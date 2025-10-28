@@ -5,7 +5,7 @@
 //! supporting different chart types, customization options, and interactive features.
 //!
 //! ## Features
-//! - **Comprehensive Chart Types**: Support for bar charts, scatter graphs, pie charts, histograms, area charts, and Cartesian graphs.
+//! - **Comprehensive Chart Types**: Support for bar charts, scatter graphs, line graphs, pie charts, histograms, area charts, and Cartesian graphs.
 //! - **Data Management**: Modular datasets for structured and reusable data handling.
 //! - **Customizable Renderers**: Drawers for rendering charts on pixel-based or vector-based canvases.
 //! - **Scalable Configuration**: Centralized figure configuration for appearance settings, including fonts, colors, and grid styles.
@@ -24,6 +24,7 @@
 //!   - [`piechart`](crate::figure::figuretypes::piechart): Pie charts for proportional data representation.
 //!   - [`quadrant1graph`](crate::figure::figuretypes::quadrant1graph): Graphs restricted to the first quadrant.
 //!   - [`scattergraph`](crate::figure::figuretypes::scattergraph): Scatter plots for individual data point visualization.
+//!   - [`linegraph`](crate::figure::figuretypes::linegraph): Line graphs for trend data representation.
 //!
 //! ## Datasets
 //! Defines reusable and modular datasets for different chart types, enabling structured data representation. Includes:
@@ -31,6 +32,7 @@
 //! - [`bardataset`](crate::figure::datasets::bardataset)
 //! - [`cartesiangraphdataset`](crate::figure::datasets::cartesiangraphdataset)
 //! - [`scattergraphdataset`](crate::figure::datasets::scattergraphdataset)
+//! - [`linegraphdataset`](crate::figure::datasets::linegraphdataset)
 //! - [`dataset`](crate::figure::datasets::dataset): Common dataset traits for unifying data operations.
 //!
 //! ## Drawers
@@ -93,6 +95,7 @@ pub mod figure {
         pub mod piechart;
         pub mod quadrant1graph;
         pub mod scattergraph;
+        pub mod linegraph;
     }
 
     pub mod datasets {
@@ -101,6 +104,7 @@ pub mod figure {
         pub mod cartesiangraphdataset;
         pub mod dataset;
         pub mod scattergraphdataset;
+        pub mod linegraphdataset;
     }
 
     pub mod drawers {
@@ -112,6 +116,7 @@ pub mod figure {
         pub mod drawerpiechart;
         pub mod drawerquadrant1graph;
         pub mod drawerscattergraph;
+        pub mod drawerlinegraph;
     }
 
     pub mod utilities {

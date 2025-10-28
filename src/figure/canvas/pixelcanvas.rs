@@ -192,12 +192,13 @@ impl PixelCanvas {
     }
 
     /// Draws a line with the specified type (solid, dashed, or dotted).
-    ///
+    /// ??? are dotted lines drawn same way as dashed lines ???
     /// # Parameters
     /// - `x1`, `y1`: Coordinates of the start point.
     /// - `x2`, `y2`: Coordinates of the end point.
     /// - `color`: The RGB color of the line.
     /// - `line_type`: The type of line to draw (`LineType`).
+    /// - would be nice to have line thickness parameter or med_line & thick_line enums
     pub fn draw_line(
         &mut self,
         x1: i32,

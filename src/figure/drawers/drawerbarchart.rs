@@ -361,7 +361,7 @@ impl Drawer for GroupBarChart {
     }
 
     fn as_any(&mut self) -> &mut (dyn Any + 'static) {
-        self as &mut (dyn Any)
+        self as &mut dyn Any
     }
 
     fn get_figure_config(&self) -> &FigureConfig {
