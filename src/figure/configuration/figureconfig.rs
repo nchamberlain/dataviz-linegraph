@@ -82,3 +82,55 @@ impl FigureConfig {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_figure_config() {
+        let config = FigureConfig::default();
+        assert_eq!(config.num_axis_ticks, 10);
+        assert_eq!(config.num_grid_horizontal, 10);
+        assert_eq!(config.num_grid_vertical, 10);
+        assert_eq!(config.color_grid, [200, 200, 200]);
+        assert_eq!(config.color_axis, [0, 0, 0]);
+        assert_eq!(config.color_background, [255, 255, 255]);
+        assert_eq!(config.color_title, [0, 0, 0]);
+        assert_eq!(config.font_size_label, 12.0);
+        assert_eq!(config.font_size_title, 24.0);
+        assert_eq!(config.font_size_legend, 10.0);
+        assert_eq!(config.font_size_axis, 10.0);
+        assert!(config.font_label.is_none());
+        assert!(config.font_title.is_none());
+    }
+
+    #[test]
+    fn test_set_font_paths() {
+        let mut config = FigureConfig::default();
+        config.set_font_paths(
+            "path/to/label_font.ttf".to_string(),
+            "path/to/title_font.ttf".to_string(),
+        );
+        assert_eq!(
+            config.font_label,
+            Some("path/to/label_font.ttf".to_string())
+        );
+        assert_eq!(
+            config.font_title,
+            Some("path/to/title_font.ttf".to_string())
+        );
+    }
+
+    #[test]
+    fn test_validate_fonts() {
+        let mut config = FigureConfig::default();
+        assert!(config.validate().is_err());
+
+        config.set_font_paths(
+            "path/to/label_font.ttf".to_string(),
+            "path/to/title_font.ttf".to_string(),
+        );
+        assert!(config.validate().is_ok());
+    }
+}

@@ -236,6 +236,13 @@ impl PixelCanvas {
                 // Draw the final pixel
                 self.draw_pixel(x2 as u32, y2 as u32, color);
             }
+            LineType::SolidThick(thickness) => {
+                let _now_drawing;
+                let _line_thickness = thickness;
+                if true {
+                    _now_drawing = false;    
+                } 
+            }
             LineType::Dashed(dash_length) | LineType::Dotted(dash_length) => {
                 let mut is_drawing = true;
                 let mut segment_length = 0;
@@ -266,6 +273,15 @@ impl PixelCanvas {
                     self.draw_pixel(x2 as u32, y2 as u32, color);
                 }
             }
+            LineType::Squared(gap, side_length) =>{
+                let _can_draw;
+                let _gap_length = gap;
+                let _side = side_length;
+                if true {
+                    _can_draw = false;
+                }
+            
+            }
         }
     }
 
@@ -282,5 +298,156 @@ impl PixelCanvas {
         let img: RgbImage = ImageBuffer::from_raw(self.width, self.height, self.buffer.clone())
             .expect("Failed to create image buffer");
         img.save(file_path).expect("Failed to save image");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use image::GenericImageView;
+    use std::env::current_dir;
+    use std::path::{PathBuf};
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn unique_path() -> PathBuf {
+        let ts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        std::env::temp_dir().join(format!("pixelcanvas_test_{}.png", ts))
+    }
+    
+    fn unique_current_path() -> PathBuf {
+        let ts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let mut my_path = current_dir().unwrap();
+        my_path.push(format!("pixelcanvas_test_{}.png", ts));
+        my_path
+    }
+
+    #[test]
+    fn test_draw_pixel_and_save_as_image() {
+        let mut canvas = PixelCanvas::new(10, 10, [100, 100, 100], 0);
+        canvas.draw_pixel(5, 5, [250, 250, 250]);
+
+        let path = unique_current_path();
+        let path_str = path.to_str().unwrap();
+
+        canvas.save_as_image(path_str);
+
+        let img = image::open(&path).expect("failed to open saved image");
+        let pixel = img.get_pixel(5, 5);
+        assert_eq!(pixel.0, [250, 250, 250, 255], "pixel color did not match");
+    } 
+
+        #[test]
+    fn test_draw_line_and_save_as_image() {
+        let mut canvas = PixelCanvas::new(100, 100, [250, 0, 0], 0);
+        canvas.draw_horizontal_line(30, [0, 0, 250]);
+        canvas.draw_horizontal_line(31, [0, 0, 250]);
+        canvas.draw_horizontal_line(32, [0, 0, 250]);
+        canvas.draw_vertical_line(50, [220, 220, 0]);
+        canvas.draw_vertical_line(51, [220, 220, 0]);
+        canvas.draw_vertical_line(52, [220, 220, 0]);
+
+        let path = unique_current_path();
+        let path_str = path.to_str().unwrap();
+
+        canvas.save_as_image(path_str);
+
+        let img = image::open(&path).expect("failed to open saved image");
+        let pixel = img.get_pixel(60, 31);
+        assert_eq!(pixel.0, [0, 0, 250, 255], "pixel color did not match");
+        let pixel = img.get_pixel(52, 70);
+        assert_eq!(pixel.0, [220, 220, 0, 255], "pixel color did not match");
+    } 
+
+    #[test]
+    fn test_save_as_image_creates_file_and_matches_dimensions_and_pixel() {
+        let mut canvas = PixelCanvas::new(16, 8, [10, 20, 30], 10);
+        canvas.draw_pixel(2, 3, [255, 0, 0]);
+
+        let path = unique_path();
+        let path_str = path.to_str().unwrap();
+
+        canvas.save_as_image(path_str);
+
+        assert!(path.exists(), "image file was not created: {}", path.display());
+
+        let img = image::open(&path).expect("failed to open saved image");
+        assert_eq!(img.dimensions(), (16, 8));
+
+        let binding = img.to_rgb8();
+        let rgb = binding.get_pixel(2, 3);
+        assert_eq!(rgb.0, [255, 0, 0], "pixel color did not match saved image");
+
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn test_save_as_image_overwrites_existing_file_and_preserves_content() {
+        let path = unique_path();
+        let path_str = path.to_str().unwrap();
+
+        // create a dummy file first
+        std::fs::write(&path, b"dummy content").expect("failed to write dummy file");
+
+        let mut canvas = PixelCanvas::new(4, 4, [1, 2, 3], 0);
+        canvas.draw_pixel(0, 0, [7, 8, 9]);
+
+        // save should overwrite the dummy file with a valid image
+        canvas.save_as_image(path_str);
+
+        let img = image::open(&path).expect("failed to open overwritten image");
+        assert_eq!(img.dimensions(), (4, 4));
+
+        let binding = img.to_rgb8();
+        let rgb = binding.get_pixel(0, 0);
+        assert_eq!(rgb.0, [7, 8, 9], "overwritten image pixel did not match");
+
+        let _ = std::fs::remove_file(path);
+    }
+    #[test]
+    fn test_draw_line_solid() {
+        let mut canvas = PixelCanvas::new(10, 10, [255, 255, 255], 0);
+        canvas.draw_line(0, 0, 9, 9, [50, 150, 250], LineType::Solid);
+        //print!("Buffer: {:?}", canvas.buffer); // use -- --show-output to see output
+        for i in 0..10 {
+            let index = ((i * 10 + i) * 3) as usize;
+            assert_eq!(canvas.buffer[index], 50);
+            assert_eq!(canvas.buffer[index + 1], 150);
+            assert_eq!(canvas.buffer[index + 2], 250);
+        }
+    }
+    #[test]
+    fn test_draw_line_dashed() {
+        let mut canvas = PixelCanvas::new(10, 10, [255, 255, 255], 0);
+        let dash_length = 2;
+        canvas.draw_line(0, 0, 9, 9, [40, 140, 240], LineType::Dashed(dash_length));
+        // print!("Buffer: {:?}", canvas.buffer); // use -- --show-output to see output
+        for i in 0..10 {
+            if i < dash_length {
+                let index = ((i * 10 + i) * 3) as usize;
+                assert_eq!(canvas.buffer[index], 40);
+                assert_eq!(canvas.buffer[index + 1], 140);
+                assert_eq!(canvas.buffer[index + 2], 240);
+            } else if i < dash_length * 2 {
+                let index = ((i * 10 + i) * 3) as usize;
+                assert_eq!(canvas.buffer[index], 0);
+                assert_eq!(canvas.buffer[index + 1], 0);
+                assert_eq!(canvas.buffer[index + 2], 0);
+            } else if i < dash_length * 3 {
+                let index = ((i * 10 + i) * 3) as usize;
+                assert_eq!(canvas.buffer[index], 40);
+                assert_eq!(canvas.buffer[index + 1], 140);
+                assert_eq!(canvas.buffer[index + 2], 240);
+            } else if i < dash_length * 4 {
+                let index = ((i * 10 + i) * 3) as usize;
+                assert_eq!(canvas.buffer[index], 0);
+                assert_eq!(canvas.buffer[index + 1], 0);
+                assert_eq!(canvas.buffer[index + 2], 0);
+            } else if i < dash_length * 5 {
+                let index = ((i * 10 + i) * 3) as usize;
+                assert_eq!(canvas.buffer[index], 40);
+                assert_eq!(canvas.buffer[index + 1], 140);
+                assert_eq!(canvas.buffer[index + 2], 240);
+            }
+        }
     }
 }
