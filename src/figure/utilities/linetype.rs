@@ -4,8 +4,8 @@ pub enum LineType {
     /// A solid line with no gaps.
     Solid,
     /// A thick solid line with no gaps 
-    /// - The `u32` value specifies the thickness of the line
-    SolidThick(u32),
+    /// - The line thickness fixed at 5 pixels (+2 and -2 of (x,y) point)
+    SolidThick,
     /// A dashed line with configurable dash length.
     /// - The `u32` value specifies the length of each dash in pixels.
     Dashed(u32),
